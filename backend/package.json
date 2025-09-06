@@ -1,0 +1,36 @@
+{
+  "name": "nioe-backend",
+  "version": "1.0.0",
+  "description": "Backend da aplicação NIOE MVP",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "echo 'Backend dev script - implementar'",
+    "build": "echo 'Backend build script - implementar'",
+    "start": "echo 'Backend start script - implementar'",
+    "test": "echo 'Backend test script - implementar'",
+    "lint": "echo 'Backend lint script - implementar'"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "typescript",
+    "backend",
+    "api",
+    "nioe"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.0",
+    "@types/cors": "^2.8.0",
+    "typescript": "^5.0.0",
+    "nodemon": "^3.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.0",
+    "dotenv": "^16.0.0"
+  }
+}

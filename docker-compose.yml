@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: nioe-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nioe_db}
+      POSTGRES_USER: ${POSTGRES_USER:-nioe_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nioe_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nioe-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: nioe-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - nioe-network
+
+  adminer:
+    image: adminer:latest
+    container_name: nioe-adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - nioe-network
+    depends_on:
+      - postgres
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nioe-backend
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-nioe_user}:${POSTGRES_PASSWORD:-nioe_password}@postgres:5432/${POSTGRES_DB:-nioe_db}
+      - JWT_SECRET=${JWT_SECRET}
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin123}
+      - NEWS_API_KEY=${NEWS_API_KEY}
+      - OPENWEATHER_KEY=${OPENWEATHER_KEY}
+      - MAPBOX_TOKEN=${MAPBOX_TOKEN}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - nioe-network
+    depends_on:
+      - postgres
+      - minio
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nioe-frontend
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_BACKEND_URL=${BACKEND_URL:-http://localhost:3001}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - nioe-network
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  nioe-network:
+    driver: bridge

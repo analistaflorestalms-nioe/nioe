@@ -1,0 +1,31 @@
+{
+  "name": "nioe-frontend",
+  "version": "1.0.0",
+  "description": "Frontend da aplicação NIOE MVP",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo 'Frontend dev script - implementar'",
+    "build": "echo 'Frontend build script - implementar'",
+    "start": "echo 'Frontend start script - implementar'",
+    "test": "echo 'Frontend test script - implementar'",
+    "lint": "echo 'Frontend lint script - implementar'"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "frontend",
+    "nioe"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
