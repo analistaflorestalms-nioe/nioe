@@ -8,12 +8,14 @@
     "dev": "nodemon server/index.js",
     "test": "jest",
     "setup": "node server/scripts/setup.js",
-    "import-data": "node server/scripts/importData.js"
+    "import-data": "node server/scripts/importData.js",
+    "seed": "node server/scripts/seedDatabase.js"
   },
   "keywords": [
     "intelligence",
-    "security",
-    "operational",
+    "osint",
+    "counter-intelligence",
+    "risk-assessment",
     "nioe",
     "mysql",
     "xampp"
@@ -40,7 +42,18 @@
     "dotenv": "^16.3.1",
     "joi": "^17.11.0",
     "winston": "^3.11.0",
-    "express-async-errors": "^3.1.1"
+    "express-async-errors": "^3.1.1",
+    "socket.io": "^4.7.4",
+    "cheerio": "^1.0.0-rc.12",
+    "puppeteer": "^21.6.1",
+    "geoip-lite": "^1.4.9",
+    "crypto": "^1.0.1",
+    "moment": "^2.29.4",
+    "lodash": "^4.17.21",
+    "chart.js": "^4.4.0",
+    "d3": "^7.8.5",
+    "leaflet": "^1.9.4",
+    "turf": "^6.5.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
