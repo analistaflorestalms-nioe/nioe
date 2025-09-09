@@ -2,8 +2,8 @@
  * NIOE - Sistema de Inteligência Operacional Especial
  * Servidor Principal
  * 
- * Sistema completo de inteligência, OSINT, contra-inteligência
- * e antecipação de riscos com dashboards em tempo real
+ * Sistema completo de inteligência operacional com
+ * dashboards em tempo real e ingestão automática de notícias
  * 
  * @author NIOE Team - T35
  * @version 2.0.0
@@ -20,6 +20,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const xssClean = require('xss-clean');
 const path = require('path');
 
 // Importar configurações
@@ -29,35 +31,24 @@ const errorHandler = require('./middleware/errorHandler');
 
 // Importar rotas
 const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const collaboratorRoutes = require('./routes/collaborators');
-const documentRoutes = require('./routes/documents');
-const activityRoutes = require('./routes/activities');
-const newsRoutes = require('./routes/news');
-const fireRoutes = require('./routes/fire');
-const occurrenceRoutes = require('./routes/occurrences');
-const dashboardRoutes = require('./routes/dashboard');
-const osintRoutes = require('./routes/osint');
-const intelligenceRoutes = require('./routes/intelligence');
-const riskRoutes = require('./routes/risk');
-const reportRoutes = require('./routes/reports');
+const ocorrenciasRoutes = require('./routes/ocorrencias');
+const colaboradoresRoutes = require('./routes/colaboradores');
+const noticiasRoutes = require('./routes/noticias');
+const metricsRoutes = require('./routes/metrics');
 
 // Importar serviços
-const NewsTrackerService = require('./services/NewsTrackerService');
-const OSINTService = require('./services/OSINTService');
-const RiskAssessmentService = require('./services/RiskAssessmentService');
-const IntelligenceAnalysisService = require('./services/IntelligenceAnalysisService');
+const RSSIngestionService = require('./services/RSSIngestionService');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
     methods: ["GET", "POST"]
   }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware de segurança
 app.use(helmet({
@@ -75,12 +66,16 @@ app.use(helmet({
 
 // Middleware de CORS
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  origin: process.env.FRONTEND_URL || "http://localhost:3000",
   credentials: true
 }));
 
 // Middleware de compressão
 app.use(compression());
+
+// Middleware de segurança
+app.use(mongoSanitize());
+app.use(xssClean());
 
 // Middleware de logging
 app.use(morgan('combined', {
@@ -115,18 +110,10 @@ app.use((req, res, next) => {
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/collaborators', collaboratorRoutes);
-app.use('/api/documents', documentRoutes);
-app.use('/api/activities', activityRoutes);
-app.use('/api/news', newsRoutes);
-app.use('/api/fire', fireRoutes);
-app.use('/api/occurrences', occurrenceRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/osint', osintRoutes);
-app.use('/api/intelligence', intelligenceRoutes);
-app.use('/api/risk', riskRoutes);
-app.use('/api/reports', reportRoutes);
+app.use('/api/ocorrencias', ocorrenciasRoutes);
+app.use('/api/colaboradores', colaboradoresRoutes);
+app.use('/api/noticias', noticiasRoutes);
+app.use('/api/metrics', metricsRoutes);
 
 // Rota de health check
 app.get('/api/health', (req, res) => {
@@ -136,9 +123,7 @@ app.get('/api/health', (req, res) => {
     version: '2.0.0',
     services: {
       database: 'Connected',
-      news_tracker: 'Active',
-      osint: 'Active',
-      risk_assessment: 'Active'
+      rss_ingestion: 'Active'
     }
   });
 });
@@ -152,10 +137,10 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       auth: '/api/auth',
-      dashboard: '/api/dashboard',
-      osint: '/api/osint',
-      intelligence: '/api/intelligence',
-      risk: '/api/risk'
+      ocorrencias: '/api/ocorrencias',
+      colaboradores: '/api/colaboradores',
+      noticias: '/api/noticias',
+      metrics: '/api/metrics'
     }
   });
 });
@@ -200,29 +185,16 @@ const startServer = async () => {
     // Inicializar serviços
     logger.info('🔄 Inicializando serviços...');
     
-    // News Tracker Service
-    const newsTracker = new NewsTrackerService(io);
-    await newsTracker.start();
-    
-    // OSINT Service
-    const osintService = new OSINTService(io);
-    await osintService.start();
-    
-    // Risk Assessment Service
-    const riskService = new RiskAssessmentService(io);
-    await riskService.start();
-    
-    // Intelligence Analysis Service
-    const intelligenceService = new IntelligenceAnalysisService(io);
-    await intelligenceService.start();
+    // RSS Ingestion Service
+    const rssService = new RSSIngestionService();
+    rssService.start();
 
     // Iniciar servidor
     server.listen(PORT, () => {
       logger.info(`🚀 Servidor NIOE iniciado na porta ${PORT}`);
       logger.info(`🌐 Acesse: http://localhost:${PORT}`);
-      logger.info(`📊 Dashboard: http://localhost:${PORT}/dashboard`);
-      logger.info(`🔍 OSINT: http://localhost:${PORT}/osint`);
-      logger.info(`⚠️  Risk Assessment: http://localhost:${PORT}/risk`);
+      logger.info(`📊 API: http://localhost:${PORT}/api`);
+      logger.info(`❤️  Health: http://localhost:${PORT}/api/health`);
     });
 
   } catch (error) {
