@@ -1,10 +1,14 @@
 # Dependencies
 node_modules/
 */node_modules/
+vendor/
 
 # Production builds
 build/
 dist/
+
+# Composer
+composer.lock
 
 # Environment variables
 .env.local
